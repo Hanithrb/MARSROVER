@@ -1,0 +1,58 @@
+function mars_surface()
+    surfaceN = rand(5:15)
+    land = zeros(Int64, surfaceN, 2)
+    
+    # first ensure there's a flat landing site at least 1000m long
+    landing_site = rand(2:surfaceN-1)
+    land[landing_site, 1] = rand(2000:5000)
+    land[landing_site+1, 1] = min(land[landing_site, 1] + rand(1000:2000), 6999)
+    land[landing_site+1, 2] = land[landing_site, 2] = rand(1:1500)
+    
+    # fill in the rest of the terrain
+    for i=1:landing_site-1
+        land[i, 1] = (land[landing_site,1] ÷ landing_site) * i
+        land[i, 2] = rand(0:1500)
+    end
+    
+    for i=landing_site+2:surfaceN
+        land[i, 1] = (land[landing_site+1,1] + 
+                      (7000 - land[landing_site+1,1]) ÷ (surfaceN - landing_site) * i)
+        land[i, 2] = rand(0:1500)
+    end
+    
+    # impose boundary conditions
+    land[1, 1] = 0
+    land[end, 1] = 6999
+
+    return land, landing_site
+end
+
+function plot_surface(land, landing_site)
+    p = plot(land[1:landing_site, 1], land[1:landing_site, 2], c=:black, legend=false)
+    plot!(land[landing_site+1:end, 1], land[landing_site+1:end, 2], c=:black, legend=false)
+    plot!([land[landing_site, 1], land[landing_site+1, 1]], 
+          [land[landing_site, 2], land[landing_site+1, 2]], c=:black, ls=:dash)
+    xlims!(0, 7000)
+    ylims!(0, 3000)
+    return p
+end
+
+function plot_lander(land, landing_site, X, thrust=nothing; animate=false, step=10)
+    if animate
+        p = @gif for n=1:10:size(X, 1)
+            plot_surface(land, landing_site)
+            plot!(X[1:n,1], X[1:n,2], c=:blue, ls=:dash)
+            scatter!([X[n, 1]], [X[n, 2]], c=:blue, ms=15, marker=:^)
+            if norm(thrust[n,:]) != 0
+                plot!([Xs[n,1], Xs[n,1] - 100*thrust[end,1]], 
+                      [Xs[n,2] - 100., Xs[n,2] - 100. - 100*thrust[end,2]], 
+                      linewidth=10, color=:red)
+            end
+        end
+    else
+        p = plot_surface(land, landing_site)
+        plot!(X[:,1], X[:,2], c=:blue, ls=:dash)
+        scatter!([X[end, 1]], [X[end, 2]], c=:blue, ms=15, marker=:^)
+    end
+    return p
+end
