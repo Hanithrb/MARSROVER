@@ -1,0 +1,33 @@
+# Function for remote self-landing by proportional control through control theory. 
+
+# vertical speed limit = 40 m/s
+# horizontal speed limit = 20 m/s
+
+function proportional_autopilot(i, X, V, fuel, rotate, power)
+    c = 10.0 
+    Kh = 0.02
+    Kp = 3
+    e = -(c + (Kh*height(land,X)) +V[2])
+    Pout = e*Kp 
+    power = Pout
+    
+    if power <= 0 
+        power = 0 
+    end 
+    if power >= 4
+        power = 4 
+    end 
+    
+    rotate = 0
+        
+ return (rotate, power)
+        
+end
+
+
+# Test succesful landing
+X0 = [(land[landing_site+1, 1] + land[landing_site, 1])÷2, 3000]
+V0 = [0., 0.]
+Xs, Vs, thrust, success = simulate(X0, V0, land, landing_site; dt=0.1, Nstep=2000, 
+                                   autopilot=proportional_autopilot, fuel=200)
+plot_lander(land, landing_site, Xs, thrust, animate=true, step=10)
