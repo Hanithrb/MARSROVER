@@ -1,0 +1,21 @@
+srand(123) # seed random number generator for reproducible results
+land, landing_site = mars_surface()
+plot_surface(land, landing_site)
+
+# Function to tell whether lander is above or below surface 
+function interpolate_surface(land, x)
+    i = findlast(land[:, 1] .< x)    
+    m = (land[i+1, 2] - land[i, 2])/(land[i+1, 1] - land[i, 1]) # gradient
+    x1, y1 = land[i, :] # point on line with eqn. y - y1 = m(x - x1) 
+    return m*(x - x1) + y1
+end
+
+# Function to determine vertical distance from surface
+function height(land, X)
+    x = X[1]
+    y = X[2]
+    
+return (y-(interpolate_surface(land,x)))
+end
+
+
