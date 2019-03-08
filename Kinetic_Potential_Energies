@@ -1,0 +1,19 @@
+# Calculating the kinetic and potential energies of the Rover according to Mars laws.
+m = 100.0
+dt = 1.0
+Nstep = Int(1.0/dt)+1
+g = 3.711
+
+Xs, Vs, thrust, success = simulate(X0, V0, land, landing_site, dt=dt, Nstep=Nstep)
+t=zeros(Nstep)
+V = zeros(Nstep)
+T = zeros(Nstep)
+E = zeros(Nstep)
+
+for i= 1:Nstep
+    t[i] = (i-1)*dt
+    V[i]= m * g * Xs[i,2]
+    T[i]=0.5 * m * Vs[i,2].^2
+    E[i]= T[i] + V[i]
+   
+end
